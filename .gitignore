@@ -1,1 +1,4 @@
-pong
+pong.nds
+pong.elf
+build/*
+.ccls-cache
