@@ -1,6 +1,6 @@
 #include "pong.h"
 
-int main() {
+int main(int argc, char* argv[]) {
     uint64_t now = SDL_GetPerformanceCounter();
     uint64_t last = 0;
     double deltaTime = 0;
@@ -8,7 +8,7 @@ int main() {
     if (!init()) {
         printf("Failed to initialize\n");
     } else {
-        if (!loadMedia()) {
+        if (!loadMedia(argv)) {
             printf("Failed to load media\n");
         } else {
             resetGame();
@@ -106,10 +106,28 @@ bool init() {
     return success;
 }
 
-bool loadMedia() {
-    bool success = true;
+bool loadMedia(char* argv[0]) {
+    bool success = true; 
 
-    // Load spritesheet
+    // Init filesystem
+    if (!(
+        PHYSFS_init(argv[0]) &&
+        PHYSFS_mount("assets.7z", NULL, true)
+    )) {
+        printf("Unable to init file system: %s\n", PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+        success = false;
+    }
+
+    // Load spritesheet file
+    gSpritesheetFile = PHYSFS_openRead("spritesheet.png");
+    if (gSpritesheetFile == NULL) {
+        printf("Unable to load texture file: %s\n", PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+        success = false;
+    }
+    uint64_t fileLength = PHYSFS_fileLength(gSpritesheetFile);
+    uint64_t m_data[fileLength]; 
+
+    // Create spritesheet
     gTexSpritesheet = loadTexture("spritesheet.png");
     if (gTexSpritesheet == NULL) {
         printf("Unable to load textures: %s\n", SDL_GetError());
@@ -233,8 +251,18 @@ void closeGame() {
 
 SDL_Texture* loadTexture(const char* path) {
     SDL_Texture* texture = NULL;
+    PHYSFS_File* textureFile = PHYSFS_openRead(path);
+    uint64_t fileLength = PHYSFS_fileLength(textureFile);
+    uint64_t fileData[fileLength];
 
-    SDL_Surface* loadedSurface = IMG_Load(path);
+    int lengthRead = PHYSFS_readBytes(textureFile, fileData, fileLength);
+    PHYSFS_close(textureFile);
+
+    SDL_RWops* rw = SDL_RWFromMem(fileData, fileLength);
+
+    SDL_Surface* loadedSurface = IMG_Load_RW(rw, 0);
+    SDL_FreeRW(rw);
+
     if (loadedSurface == NULL) {
         printf("Unable to load image \"%s\": %s\n", path, SDL_GetError());
     } else {

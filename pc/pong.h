@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_mixer.h>
+#include <physfs.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <math.h>
@@ -31,6 +32,7 @@ SDL_Renderer* gRenderer = NULL;
 
 Mix_Chunk* gBounceSound = NULL;
 
+PHYSFS_File* gSpritesheetFile = NULL;
 SDL_Texture* gTexSpritesheet = NULL;
 
 SDL_Rect gSrcRectBall = {.x = 16, .y = 0, .w = 16, .h = 16};
@@ -83,11 +85,11 @@ bool gPalette2GoesDown = false;
 int leftScore = 0;
 int rightScore = 0;
 
-int main();
+int main(int argc, char* argv[]);
 
 bool init();
 
-bool loadMedia();
+bool loadMedia(char* argv[]);
 
 void update(float deltaTime);
 

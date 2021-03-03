@@ -1,6 +1,6 @@
 OBJS = pong.c
 CC = gcc
-LINKER_FLAGS = -lm -lSDL2 -lSDL2_image -lSDL2_mixer -g
+LINKER_FLAGS = -lm -lSDL2 -lSDL2_image -lSDL2_mixer -lphysfs -g
 OBJ_NAME = pong
 
 all: $(OBJS)
